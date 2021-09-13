@@ -96,9 +96,5 @@ void i2c_slave_deinit() {
     i2c_hw_t *hw = i2c_get_hw(i2c);
     hw->intr_mask = I2C_IC_INTR_MASK_RESET;
 
-    i2c->hw->enable = 0;
-    hw_clear_bits(&hw->con, I2C_IC_CON_RX_FIFO_FULL_HLD_CTRL_BITS);
-    i2c->hw->enable = 1;
-
     i2c_set_slave_mode(i2c, false, 0);
 }
