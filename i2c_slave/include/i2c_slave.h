@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2021 Valentin Milea <valentin.milea@gmail.com>
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#ifndef _I2C_SLAVE_H_
+#define _I2C_SLAVE_H_
+
+#include <hardware/i2c.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** \file i2c_slave.h
+ *
+ * \brief I2C slave setup.
+ */
+
+/**
+ * \brief I2C slave event types.
+ */
+typedef enum i2c_slave_event_t {
+    I2C_SLAVE_RECEIVE, /**< Data from master is available for reading. Slave must read from Rx FIFO. */
+    I2C_SLAVE_REQUEST, /**< Master is requesting data. Slave must write into Tx FIFO. */
+    I2C_SLAVE_FINISH, /**< Master has sent a Stop or Restart signal. Slave may prepare for the next transfer. */
+} i2c_slave_event_t;
+
+/**
+ * \brief I2C slave event handler
+ * 
+ * The event handler will run from the I2C ISR, so it must return quickly (under 25 us at 400 kb/s).
+ * 
+ * \param i2c Slave I2C instance.
+ * \param event Event type.
+ */
+typedef void (*i2c_slave_handler_t)(i2c_inst_t *i2c, i2c_slave_event_t event);
+
+/**
+ * \brief Configure I2C instance for slave mode.
+ * 
+ * \param i2c I2C instance.
+ * \param address 7-bit slave address.
+ * \param handler Called on events from I2C master. It will run from the I2C ISR, on the CPU core
+ *                where the slave was initialized.
+ */
+void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handler);
+
+/**
+ * \brief Restore I2C instance to master mode.
+ */
+void i2c_slave_deinit();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _I2C_SLAVE_H_
