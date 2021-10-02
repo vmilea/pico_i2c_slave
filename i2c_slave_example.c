@@ -65,12 +65,12 @@ static void master_thread() {
 
     gpio_init(I2C_MASTER_SDA_PIN);
     gpio_set_function(I2C_MASTER_SDA_PIN, GPIO_FUNC_I2C);
-    // pull-ups are already active on slave side
-    gpio_disable_pulls(I2C_MASTER_SDA_PIN);
+    // pull-ups are already active on slave side, this is a failsafe in case the wiring is faulty
+    gpio_pull_up(I2C_MASTER_SDA_PIN);
 
     gpio_init(I2C_MASTER_SCL_PIN);
     gpio_set_function(I2C_MASTER_SCL_PIN, GPIO_FUNC_I2C);
-    gpio_disable_pulls(I2C_MASTER_SCL_PIN);
+    gpio_pull_up(I2C_MASTER_SCL_PIN);
 
     for (uint8_t mem_address = 0; ; mem_address = (mem_address + 32) % 256) {
         char msg[32];
