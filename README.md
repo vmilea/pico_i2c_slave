@@ -14,7 +14,7 @@ Follow the instructions in [Getting started with Raspberry Pi Pico](https://data
 
 - clone repo
 - `mkdir build`, `cd build`, `cmake ../`, `make`
-- copy `i2c_slave_example.uf2` to Raspberry Pico
+- copy `example_mem/example_mem.uf2` to Raspberry Pico
 - open a serial connection and check output
 
 ## Links
