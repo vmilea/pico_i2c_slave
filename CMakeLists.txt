@@ -11,3 +11,4 @@ pico_sdk_init()
 
 add_subdirectory(i2c_slave)
 add_subdirectory(example_mem)
+add_subdirectory(example_mem_wire)
