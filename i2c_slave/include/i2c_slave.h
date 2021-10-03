@@ -50,8 +50,10 @@ void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handle
 
 /**
  * \brief Restore I2C instance to master mode.
+ *
+ * \param i2c I2C instance.
  */
-void i2c_slave_deinit();
+void i2c_slave_deinit(i2c_inst_t *i2c);
 
 #ifdef __cplusplus
 }

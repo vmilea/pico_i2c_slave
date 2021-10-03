@@ -20,4 +20,4 @@ pico_add_extra_outputs(i2c_slave_example)
 
 target_compile_options(i2c_slave_example PRIVATE -Wall)
 
-target_link_libraries(i2c_slave_example hardware_i2c i2c_slave pico_multicore pico_stdlib)
+target_link_libraries(i2c_slave_example i2c_slave pico_multicore pico_stdlib)

@@ -6,7 +6,6 @@
 
 #include <i2c_slave.h>
 #include <hardware/irq.h>
-#include <hardware/sync.h>
 
 typedef struct i2c_slave_t
 {
@@ -15,8 +14,7 @@ typedef struct i2c_slave_t
     bool transfer_in_progress;
 } i2c_slave_t;
 
-static i2c_slave_t i2c_core0_slave;
-static i2c_slave_t i2c_core1_slave;
+static i2c_slave_t i2c_slaves[2];
 
 static inline void finish_transfer(i2c_slave_t *slave) {
     if (slave->transfer_in_progress) {
@@ -25,8 +23,7 @@ static inline void finish_transfer(i2c_slave_t *slave) {
     }
 }
 
-static void __not_in_flash_func(i2c_slave_irq_handler)() {
-    i2c_slave_t *slave = (get_core_num() ? &i2c_core1_slave : &i2c_core0_slave);
+static void __not_in_flash_func(i2c_slave_irq_handler)(i2c_slave_t *slave) {
     i2c_inst_t *i2c = slave->i2c;
     i2c_hw_t *hw = i2c_get_hw(i2c);
 
@@ -57,11 +54,20 @@ static void __not_in_flash_func(i2c_slave_irq_handler)() {
     }
 }
 
+static void __not_in_flash_func(i2c0_slave_irq_handler)() {
+    i2c_slave_irq_handler(&i2c_slaves[0]);
+}
+
+static void __not_in_flash_func(i2c1_slave_irq_handler)() {
+    i2c_slave_irq_handler(&i2c_slaves[1]);
+}
+
 void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handler) {
     invalid_params_if(I2C, i2c != i2c0 && i2c != i2c1);
     invalid_params_if(I2C, handler == NULL);
 
-    i2c_slave_t *slave = (get_core_num() ? &i2c_core1_slave : &i2c_core0_slave);
+    uint i2c_index = i2c_hw_index(i2c);
+    i2c_slave_t *slave = &i2c_slaves[i2c_index];
     slave->i2c = i2c;
     slave->handler = handler;
 
@@ -75,23 +81,25 @@ void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handle
     hw->intr_mask = I2C_IC_INTR_MASK_M_RX_FULL_BITS | I2C_IC_INTR_MASK_M_RD_REQ_BITS | I2C_IC_RAW_INTR_STAT_TX_ABRT_BITS | I2C_IC_INTR_MASK_M_STOP_DET_BITS | I2C_IC_INTR_MASK_M_START_DET_BITS;
 
     // enable interrupt for current core
-    uint num = I2C0_IRQ + i2c_hw_index(i2c);
-    irq_set_exclusive_handler(num, i2c_slave_irq_handler);
+    uint num = I2C0_IRQ + i2c_index;
+    irq_set_exclusive_handler(num, i2c_index == 0 ? i2c0_slave_irq_handler : i2c1_slave_irq_handler);
     irq_set_enabled(num, true);
 }
 
-void i2c_slave_deinit() {
-    i2c_slave_t *slave = (get_core_num() ? &i2c_core1_slave : &i2c_core0_slave);
-    i2c_inst_t *i2c = slave->i2c;
-    hard_assert_if(I2C, i2c == NULL); // should be called after i2c_slave_init()
-    
+void i2c_slave_deinit(i2c_inst_t *i2c) {
+    invalid_params_if(I2C, i2c != i2c0 && i2c != i2c1);
+
+    uint i2c_index = i2c_hw_index(i2c);
+    i2c_slave_t *slave = &i2c_slaves[i2c_index];
+    hard_assert_if(I2C, slave->i2c != i2c); // should be called after i2c_slave_init()
+
     slave->i2c = NULL;
     slave->handler = NULL;
     slave->transfer_in_progress = false;
 
-    uint num = I2C0_IRQ + i2c_hw_index(i2c);
+    uint num = I2C0_IRQ + i2c_index;
     irq_set_enabled(num, false);
-    irq_remove_handler(num, i2c_slave_irq_handler);
+    irq_remove_handler(num, i2c_index == 0 ? i2c0_slave_irq_handler : i2c1_slave_irq_handler);
 
     i2c_hw_t *hw = i2c_get_hw(i2c);
     hw->intr_mask = I2C_IC_INTR_MASK_RESET;
