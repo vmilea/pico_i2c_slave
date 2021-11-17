@@ -63,8 +63,8 @@ static void __not_in_flash_func(i2c1_slave_irq_handler)() {
 }
 
 void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handler) {
-    invalid_params_if(I2C, i2c != i2c0 && i2c != i2c1);
-    invalid_params_if(I2C, handler == NULL);
+    assert(i2c == i2c0 || i2c == i2c1);
+    assert(handler != NULL);
 
     uint i2c_index = i2c_hw_index(i2c);
     i2c_slave_t *slave = &i2c_slaves[i2c_index];
@@ -87,11 +87,11 @@ void i2c_slave_init(i2c_inst_t *i2c, uint8_t address, i2c_slave_handler_t handle
 }
 
 void i2c_slave_deinit(i2c_inst_t *i2c) {
-    invalid_params_if(I2C, i2c != i2c0 && i2c != i2c1);
+    assert(i2c == i2c0 || i2c == i2c1);
 
     uint i2c_index = i2c_hw_index(i2c);
     i2c_slave_t *slave = &i2c_slaves[i2c_index];
-    hard_assert_if(I2C, slave->i2c != i2c); // should be called after i2c_slave_init()
+    assert(slave->i2c == i2c); // should be called after i2c_slave_init()
 
     slave->i2c = NULL;
     slave->handler = NULL;
