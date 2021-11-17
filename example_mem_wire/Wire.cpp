@@ -25,15 +25,20 @@ i2c_inst_t *TwoWire::i2c() const {
 void TwoWire::begin() {
     assert(txAddress_ == NO_ADDRESS); // not allowed during transmission
 
+    if (mode_ != Unassigned) {
+        i2c_slave_deinit(i2c());
+    }
     mode_ = Master;
     bufLen_ = 0;
     bufPos_ = 0;
-    i2c_slave_deinit(i2c());
 }
 
 void TwoWire::begin(uint8_t selfAddress) {
     assert(txAddress_ == NO_ADDRESS); // not allowed during transmission
 
+    if (mode_ != Unassigned) {
+        i2c_slave_deinit(i2c());
+    }
     mode_ = Slave;
     bufLen_ = 0;
     bufPos_ = 0;
