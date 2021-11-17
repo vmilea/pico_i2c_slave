@@ -10,11 +10,12 @@ For those who prefer the Wire API commonly used with Arduino, there is a second 
 
 To keep it simple, both master and slave run on the same board. Just add jumpers between the two I2C instances: GP4 to GP6 (SDA), and GP5 to GP7 (SCL). 
 
-### Building
+### Setup
 
 Follow the instructions in [Getting started with Raspberry Pi Pico](https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf) to setup your build environment. Then:
 
-- clone repo
+- `git clone https://github.com/vmilea/pico_i2c_slave`
+- `cd pico_i2c_slave`
 - `mkdir build`, `cd build`, `cmake ../`, `make`
 - copy `example_mem/example_mem.uf2` to Raspberry Pico
 - open a serial connection and check output
