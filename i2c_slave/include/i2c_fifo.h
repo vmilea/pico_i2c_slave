@@ -21,6 +21,8 @@ extern "C" {
 /**
  * \brief Pop a byte from I2C Rx FIFO.
  * 
+ * This function is non-blocking and assumes the Rx FIFO isn't empty.
+ * 
  * \param i2c I2C instance.
  * \return uint8_t Byte value.
  */
@@ -32,6 +34,8 @@ static inline uint8_t i2c_read_byte(i2c_inst_t *i2c) {
 
 /**
  * \brief Push a byte into I2C Tx FIFO.
+ * 
+ * This function is non-blocking and assumes the Tx FIFO isn't full.
  * 
  * \param i2c I2C instance.
  * \param value Byte value.
