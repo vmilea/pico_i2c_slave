@@ -129,5 +129,8 @@ int main() {
     puts("\nI2C slave example");
 
     setup_slave();
-    run_master();
+    while(true) {
+        run_master();
+        sleep_ms(1000);
+    }
 }
